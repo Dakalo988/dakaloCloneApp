@@ -1,42 +1,44 @@
 import User from "../models/User";
+import { validationResult } from "express-validator";
 
 export class UserController {
-  static signup(req, res,next) {
- 
+  static async signup(req, res, next) {
+    const errors = validationResult(req);
+    const name = req.body.name;
+    const email = req.body.email;
+    const phone = req.body.phone;
+    const password = req.body.password;
+    const type = req.body.type;
+    const status = req.body.status;
 
-  const email = req.body.email;
-  const password = req.body.password;
-  if(!email){
-    const error = new Error('Email is required');
-    next(error);
-  } else if(!password) {
-    const error = new Error('password is required');
-    next(error);
-  }
-  // const user = new User({
-  //   email,
-  //   password
-  // })
+    if (!errors.isEmpty()) {
+      next(new Error(errors.array()[0].msg));
+    }
 
-  // user.save().then((user) => {
-  //   res.send(user);
-  // })
-  // .catch(e => { const err = new Error(e);
-  //   next(e);
-  // })
-    
-  
+    const data = {
+      email,
+      phone,
+      password,
+      name,
+      type,
+      status,
+    };
 
-  }
+    try {
+      let user = await new User(data).save();
+      res.send(user);
+    } catch (e) {
+      next(e);
+    }
 
-
-  static test1(req, res, next) {
-    console.log("test");
-    (req as any).msg = "This is a test";
-    next();
-  }
-
-  static test2(req, res) {
-    res.send((req as any).msg);
+    // user
+    //   .save()
+    //   .then((user) => {
+    //     res.send(user);
+    //   })
+    //   .catch((e) => {
+    //     const err = new Error(e);
+    //     next(e);
+    //   });
   }
 }
